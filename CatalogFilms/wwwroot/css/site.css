@@ -45,6 +45,12 @@ header ul
 header ul li a
 {
   text-decoration: none;
+  color: #5200ee;
+}
+
+header ul li a:visited
+{
+  color: #5200ee;
 }
 
 #activePage

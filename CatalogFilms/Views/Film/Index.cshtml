@@ -16,51 +16,186 @@
         border-radius: 5px;
     }
 
-    .filter
+    #control a
     {
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
+        text-decoration: none;
+        color: #5200ee;
+    }
+
+    table
+    {
+        text-align: center;
+        border-spacing: 10px;
+        border-collapse: separate;
+        width: 100%;
+        height: 100%;
     }
 
     table tr td
     {
         padding: 20px;
     }
+    
+    td a
+    {
+        color: black;
+    }
+
+    .modal 
+    {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.4); 
+    }
+
+    .modal-content 
+    {
+        background-color: #fefefe;
+        margin: 15% auto; 
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .close 
+    {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus 
+    {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .delete-film 
+    {
+        cursor: pointer;
+    }
 </style>
 
 <div id="control">
-    <div class="filter" id="filterBtn">
-        <i class="fa-solid fa-gear" style="color: gray;"></i>
-        Фільтрувати за параметрами
-        <i class="fa-solid fa-chevron-down" style="color: lightblue;"></i>
-    </div>
+    <a asp-action="Create">Додати фільм</a>
 </div>
 <article>
-    <table>
+    <table id="filmsTable">
         <thead>
         <tr>
             <th>Назва</th>
             <th>Режисер</th>
             <th>Дата виходу</th>
             <th>Категорії</th>
+            <th>Керування</th>
         </tr>
         </thead>
-        <tbody>
-        @foreach (var item in Model)
+        <tbody id="filmsList">
+        @if (Model != null)
         {
-            <tr>
-                <td>@item.Name</td>
-                <td>Режисер: @item.Director</td>
-                <td>@item.Release.ToString("dd-MM-yy")</td>
-                <td></td>
-            </tr>
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>Режисер: @item.Director</td>
+                    <td>@item.Release.ToString("dd.MM.yy hh:mm")</td>
+                    <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
+                    <td>
+                        <a asp-controller="Film" asp-action="Edit"
+                           style="margin-right: 10px">
+                            <i class="fa-solid fa-pen" ></i>
+                        </a>
+                        <i class="fa-solid fa-x delete-film" data-film-id="@item.Id"></i>
+                        
+                    </td>
+                </tr>
+            }
         }
-        
         </tbody>
     </table>
 </article>
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <p id="deleteMessage"></p>
+        <span class="close"><i class="fa-solid fa-x"></i></span>
+    </div>
+</div>
+
+
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const filmService = new FilmService('http://localhost:5099/api/Film');
+
+        document.querySelectorAll('.delete-film').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const filmId = event.currentTarget.getAttribute('data-film-id');
+                try {
+                    await filmService.deleteFilm(filmId);
+                    await openModal("Об'єкт видалено успішно.");
+                    await updateFilmsTable(await filmService.GetFilmCategory());
+                } 
+                catch (error) {
+                    console.error(error);
+                }
+            });
+        });
+    });
+
+    async function updateFilmsTable(films) {
+        const filmsList = document.getElementById('filmsList');
+
+        filmsList.innerHTML = '';
+
+        films.forEach(function(film) {
+            const categories = film.categoriesList.map(category => category.name).join(', ');
+
+            const row = `
+            <tr>
+                <td>${film.name}</td>
+                <td>Режисер: ${film.director}</td>
+                <td>${new Date(film.release).toLocaleDateString()}</td>
+                <td>${categories}</td>
+                <td>
+                        <a asp-controller="Film" asp-action="Edit"
+                           style="margin-right: 10px">
+                            <i class="fa-solid fa-pen" ></i>
+                        </a>
+                        <i class="fa-solid fa-x delete-film" data-film-id="${film.id}"></i>
+                        
+                    </td>
+            </tr>
+        `;
+            filmsList.innerHTML += row;
+        });
+    }
     
+    async function openModal(message) {
+        document.getElementById("deleteMessage").innerText = message;
+        document.getElementById("deleteModal").style.display = "block";
+    }
+    
+    document.querySelector(".close").addEventListener("click", function() {
+        document.getElementById("deleteModal").style.display = "none";
+    });
+    
+    window.addEventListener("click", function(event) {
+        if (event.target == document.getElementById("deleteModal")) {
+            document.getElementById("deleteModal").style.display = "none";
+        }
+    });
 </script>

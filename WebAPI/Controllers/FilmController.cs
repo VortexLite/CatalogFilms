@@ -1,10 +1,13 @@
-﻿using Domain.Entity;
+﻿using CatalogFilms.Models;
+using Domain.Entity;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DAL;
 
 namespace WebAPI.Controllers;
 
+[EnableCors("AllowSpecificOrigin")]
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class FilmController : ControllerBase
@@ -97,7 +100,7 @@ public class FilmController : ControllerBase
             return BadRequest(e.Message);
         }
     }
-
+    
     [HttpDelete]
     public async Task<IActionResult> Delete(int id)
     {
@@ -110,8 +113,98 @@ public class FilmController : ControllerBase
             }
             
             _db.Films.Remove(film);
-            await _db.SaveChangesAsync();
+            //await _db.SaveChangesAsync();
             return Ok("Film details deleted");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetFilmCategory()
+    {
+        try
+        {
+            var filmsWithCategories = await _db.Films
+                .Select(film => new FilmWithCategoriesViewModel
+                {
+                    Id = film.Id,
+                    Name = film.Name,
+                    Director = film.Director,
+                    Release = film.Release,
+                    CategoriesList = film.FilmCategories.Select(fc => new Categories()
+                    {
+                        Id = fc.Category.Id,
+                        Name = fc.Category.Name
+                    }).ToList()
+                })
+                .ToListAsync();
+            
+            if (filmsWithCategories == null)
+            {
+                return NotFound($"FilmWithCategoriesViewModel not found");
+            }
+
+            return Ok(filmsWithCategories);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Filter(string? sortOrder, string? directorName, string? categoryFilter)
+    {
+        try
+        {
+            var query = _db.Films.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(directorName))
+            {
+                query = query.Where(f => EF.Functions.Like(f.Director, $"%{directorName}%"));
+            }
+            
+            if (!string.IsNullOrEmpty(categoryFilter))
+            {
+                query = query.Where(f => f.FilmCategories.Any(fc => fc.Category.Name == categoryFilter));
+            }
+            
+            switch (sortOrder)
+            {
+                case "asc":
+                    query = query.OrderBy(f => f.Release);
+                    break;
+                case "desc":
+                    query = query.OrderByDescending(f => f.Release);
+                    break;
+                default:
+                    break;
+            }
+
+            var films = await query
+                .Select(film => new FilmWithCategoriesViewModel
+                {
+                    Id = film.Id,
+                    Name = film.Name,
+                    Director = film.Director,
+                    Release = film.Release,
+                    CategoriesList = film.FilmCategories.Select(fc => new Categories
+                    {
+                        Id = fc.Category.Id,
+                        Name = fc.Category.Name
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            if (films.Count == 0)
+            {
+                return NotFound("Films not found.");
+            }
+
+            return Ok(films);
         }
         catch (Exception e)
         {

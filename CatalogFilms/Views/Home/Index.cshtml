@@ -92,9 +92,7 @@
         Фільтрувати за параметрами
         <i class="fa-solid fa-chevron-down" style="color: lightblue;"></i>
     </div>
-    <div class="filter-options" style="display: grid;" id="filterOptions">
-        <!-- (бонусом використати бібліотеку що додасть до таблиці сортування за датою і фільтрацію за режисером, *великим бонусом
-        реалізувати фільтр за категорією) -->
+    <div class="filter-options" style="display: none;" id="filterOptions">
 
         <label for="directorName">Фільтр за режисером:</label>
         <input type="text" id="directorName">
@@ -134,7 +132,7 @@
                 <tr>
                     <td>@item.Name</td>
                     <td>Режисер: @item.Director</td>
-                    <td>@item.Release.ToString("dd.MM.yy")</td>
+                    <td>@item.Release.ToString("dd.MM.yy hh:mm")</td>
                     <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
                 </tr>
             }
@@ -162,20 +160,20 @@
         });
     });
     
-    const filmCategoryService = new FilmCategoryService('http://localhost:5099/api/FilmCategory');
+    const filmService = new FilmService('http://localhost:5099/api/Film');
 
     async function filterByDirector() {
         var directorName = document.getElementById('directorName').value.trim();
         var categoryFilter = document.getElementById('categoryFilter').value;
         var sortOrder = document.getElementById('sortOrder').value;
         
-        const response = await filmCategoryService.Filter(sortOrder, directorName, categoryFilter);
+        const response = await filmService.Filter(sortOrder, directorName, categoryFilter);
 
         if (response && response.length > 0) {
-            updateFilmsTable(response);
+            await updateFilmsTable(response);
         } else {
-            const allFilms = await filmCategoryService.getFilmCategories();
-            updateFilmsTable(allFilms);
+            const allFilms = await filmService.GetFilmCategory();
+            await updateFilmsTable(allFilms);
         }
     }
     
@@ -198,5 +196,4 @@
             filmsList.innerHTML += row;
         });
     }
-    
 </script>

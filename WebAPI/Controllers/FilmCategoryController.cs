@@ -1,13 +1,10 @@
-﻿using CatalogFilms.Models;
-using Domain.Entity;
-using Microsoft.AspNetCore.Cors;
+﻿using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DAL;
 
 namespace WebAPI.Controllers;
 
-[EnableCors("AllowSpecificOrigin")]
 [ApiController]
 [Route("api/[controller]/[action]")]
 public class FilmCategoryController : ControllerBase
@@ -114,127 +111,6 @@ public class FilmCategoryController : ControllerBase
             _db.FilmCategories.Remove(filmCategories);
             await _db.SaveChangesAsync();
             return Ok("Film details deleted");
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> GetFilmCategory()
-    {
-        try
-        {
-            var filmsWithCategories = await _db.Films
-                .Select(film => new FilmWithCategoriesViewModel
-                {
-                    Name = film.Name,
-                    Director = film.Director,
-                    Release = film.Release,
-                    CategoriesList = film.FilmCategories.Select(fc => new Categories()
-                    {
-                        Id = fc.Category.Id,
-                        Name = fc.Category.Name
-                    }).ToList()
-                })
-                .ToListAsync();
-            
-            if (filmsWithCategories == null)
-            {
-                return NotFound($"FilmWithCategoriesViewModel not found");
-            }
-
-            return Ok(filmsWithCategories);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> FilterByDirector(string directorName)
-    {
-        try
-        {
-            var filmsWithCategories = await _db.Films
-                .Where(f => f.Director == directorName)
-                .Select(film => new FilmWithCategoriesViewModel
-                {
-                    Name = film.Name,
-                    Director = film.Director,
-                    Release = film.Release,
-                    CategoriesList = film.FilmCategories.Select(fc => new Categories()
-                    {
-                        Id = fc.Category.Id,
-                        Name = fc.Category.Name
-                    }).ToList()
-                })
-                .ToListAsync();
-            
-            if (filmsWithCategories.Count == 0)
-            {
-                return NotFound($"Films directed by {directorName} not found.");
-            }
-
-            return Ok(filmsWithCategories);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-    
-    [HttpGet]
-    public async Task<IActionResult> Filter(string? sortOrder, string? directorName, string? categoryFilter)
-    {
-        try
-        {
-            var query = _db.Films.AsQueryable();
-            
-            if (!string.IsNullOrEmpty(directorName))
-            {
-                query = query.Where(f => EF.Functions.Like(f.Director, $"%{directorName}%"));
-            }
-            
-            if (!string.IsNullOrEmpty(categoryFilter))
-            {
-                query = query.Where(f => f.FilmCategories.Any(fc => fc.Category.Name == categoryFilter));
-            }
-            
-            switch (sortOrder)
-            {
-                case "asc":
-                    query = query.OrderBy(f => f.Release);
-                    break;
-                case "desc":
-                    query = query.OrderByDescending(f => f.Release);
-                    break;
-                default:
-                    break;
-            }
-
-            var films = await query
-                .Select(film => new FilmWithCategoriesViewModel
-                {
-                    Name = film.Name,
-                    Director = film.Director,
-                    Release = film.Release,
-                    CategoriesList = film.FilmCategories.Select(fc => new Categories
-                    {
-                        Id = fc.Category.Id,
-                        Name = fc.Category.Name
-                    }).ToList()
-                })
-                .ToListAsync();
-
-            if (films.Count == 0)
-            {
-                return NotFound("Films not found.");
-            }
-
-            return Ok(films);
         }
         catch (Exception e)
         {

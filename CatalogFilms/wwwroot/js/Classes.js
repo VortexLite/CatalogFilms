@@ -1,19 +1,19 @@
-﻿class FilmCategoryService {
+﻿class FilmService {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
     }
 
-    async getFilmCategories() {
+    async getFilm() {
         const response = await fetch(`${this.baseUrl}/Get`);
         return await response.json();
     }
 
-    async getFilmCategory(id) {
+    async getFilm(id) {
         const response = await fetch(`${this.baseUrl}/Get/${id}`);
         return await response.json();
     }
 
-    async addFilmCategory(model) {
+    async addFilm(model) {
         const response = await fetch(`${this.baseUrl}/Post`, {
             method: 'POST',
             headers: {
@@ -24,7 +24,7 @@
         return await response.text();
     }
 
-    async updateFilmCategory(model) {
+    async updateFilm(model) {
         const response = await fetch(`${this.baseUrl}/Put`, {
             method: 'PUT',
             headers: {
@@ -35,7 +35,7 @@
         return await response.text();
     }
 
-    async deleteFilmCategory(id) {
+    async deleteFilm(id) {
         const response = await fetch(`${this.baseUrl}/Delete?id=${id}`, {
             method: 'DELETE'
         });

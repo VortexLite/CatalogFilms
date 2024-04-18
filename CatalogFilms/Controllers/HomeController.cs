@@ -24,7 +24,7 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         var films = new List<FilmWithCategoriesViewModel>();
-        var response = await _client.GetAsync(_client.BaseAddress + "/FilmCategory/GetFilmCategory");
+        var response = await _client.GetAsync(_client.BaseAddress + "/Film/GetFilmCategory");
         if (response.IsSuccessStatusCode)
         {
             string data = await response.Content.ReadAsStringAsync();

@@ -1,4 +1,5 @@
-﻿using Domain.Entity;
+﻿using CatalogFilms.Models;
+using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -22,19 +23,24 @@ public class FilmController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var films = new List<Films>();
-        var response = await _client.GetAsync(_client.BaseAddress + "/Film/Get");
+        var films = new List<FilmWithCategoriesViewModel>();
+        var response = await _client.GetAsync(_client.BaseAddress + "/Film/GetFilmCategory");
         if (response.IsSuccessStatusCode)
         {
             string data = await response.Content.ReadAsStringAsync();
-            films = JsonConvert.DeserializeObject<List<Films>>(data);
-            
+            films = JsonConvert.DeserializeObject<List<FilmWithCategoriesViewModel>>(data);
         }
         return View(films);
     }
 
     [HttpGet]
     public IActionResult Create()
+    {
+        return View();
+    }
+    
+    [HttpGet]
+    public IActionResult Edit()
     {
         return View();
     }
