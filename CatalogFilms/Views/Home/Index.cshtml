@@ -1,8 +1,202 @@
-﻿@{
+﻿@model System.Collections.Generic.List<FilmWithCategoriesViewModel>?
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    #control
+    {
+        padding: 10px;
+        background: #f7f7f7;
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+        border-radius: 5px;
+    }
+
+    .filter
+    {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .filter:hover
+    {
+        cursor: pointer;
+    }
+
+    .filter-options
+    {
+        position: absolute;
+        margin-top: 50px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: center;
+        z-index: 2;
+        background-color: white;
+        border: 1px solid black;
+        padding: 15px;
+        border-radius: 5px;
+        width: 40%;
+    }
+
+    .filter-options label {
+        font-weight: bold;
+
+    }
+
+    .filter-options input,
+    .filter-options select {
+        width: 100%;
+        padding: 5px;
+        border-radius: 3px;
+        border: 1px solid #ccc;
+    }
+
+    .filter-options button
+    {
+        grid-column: 1 / span 2;
+        padding: 5px;
+        border-radius: 5px;
+        border: 0;
+        background-color: #b4b4b4;
+        cursor: pointer;
+    }
+
+    .filter-options button:hover
+    {
+        background-color: #f7f7f7;
+        transition: .3s ease;
+    }
+    
+    table
+    {
+        text-align: center;
+        border-spacing: 10px;
+        border-collapse: separate;
+        width: 100%;
+        height: 100%;
+    }
+    
+    table tr td
+    {
+        padding: 20px;
+    }
+</style>
+
+<div id="control">
+    <div class="filter" id="filterBtn">
+        <i class="fa-solid fa-gear" style="color: gray;"></i>
+        Фільтрувати за параметрами
+        <i class="fa-solid fa-chevron-down" style="color: lightblue;"></i>
+    </div>
+    <div class="filter-options" style="display: grid;" id="filterOptions">
+        <!-- (бонусом використати бібліотеку що додасть до таблиці сортування за датою і фільтрацію за режисером, *великим бонусом
+        реалізувати фільтр за категорією) -->
+
+        <label for="directorName">Фільтр за режисером:</label>
+        <input type="text" id="directorName">
+
+        <label for="categoryFilter">Фільтр за категорією:</label>
+        <select id="categoryFilter">
+            <option value="">Усі категорії</option>
+            <option value="action">Екшн</option>
+            <option value="comedy">Комедія</option>
+            
+        </select>
+
+        <label for="sortOrder">Сортувати за датою:</label>
+        <select id="sortOrder">
+            <option value="asc">За зростанням</option>
+            <option value="desc">За спаданням</option>
+        </select>
+        
+        <button id="filterButton">Фільтрувати</button>
+    </div>
 </div>
+<article>
+    <table id="filmsTable">
+        <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Режисер</th>
+            <th>Дата виходу</th>
+            <th>Категорії</th>
+        </tr>
+        </thead>
+        <tbody id="filmsList">
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>Режисер: @item.Director</td>
+                    <td>@item.Release.ToString("dd.MM.yy")</td>
+                    <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</article>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterButton = document.getElementById('filterButton');
+        filterButton.addEventListener('click', function() {
+            filterByDirector();
+        });
+        
+        var filterBtn = document.getElementById('filterBtn');
+        var icon = filterBtn.querySelector('.fa-chevron-down');
+        var filterOptions = document.querySelector('.filter-options');
+
+        filterBtn.addEventListener('click', function() {
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+
+            filterOptions.style.display = filterOptions.style.display === 'none' ? 'grid' : 'none';
+        });
+    });
+    
+    const filmCategoryService = new FilmCategoryService('http://localhost:5099/api/FilmCategory');
+
+    async function filterByDirector() {
+        var directorName = document.getElementById('directorName').value.trim();
+        var categoryFilter = document.getElementById('categoryFilter').value;
+        var sortOrder = document.getElementById('sortOrder').value;
+        
+        const response = await filmCategoryService.Filter(sortOrder, directorName, categoryFilter);
+
+        if (response && response.length > 0) {
+            updateFilmsTable(response);
+        } else {
+            const allFilms = await filmCategoryService.getFilmCategories();
+            updateFilmsTable(allFilms);
+        }
+    }
+    
+    async function updateFilmsTable(films) {
+        const filmsList = document.getElementById('filmsList');
+
+        filmsList.innerHTML = '';
+
+        films.forEach(function(film) {
+            const categories = film.categoriesList.map(category => category.name).join(', ');
+
+            const row = `
+            <tr>
+                <td>${film.name}</td>
+                <td>Режисер: ${film.director}</td>
+                <td>${new Date(film.release).toLocaleDateString()}</td>
+                <td>${categories}</td>
+            </tr>
+        `;
+            filmsList.innerHTML += row;
+        });
+    }
+    
+</script>

@@ -1,14 +1,23 @@
-﻿namespace WebAPI.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Entity;
 
 public class FilmCategories
 {
-    public int FilmCategoryId { get; set; }
-    
+    [Key]
+    [Column("FilmCategoryId")]
+    public int Id { get; set; }
+
+    [Required]
     public int FilmId { get; set; }
-    public Films Films { get; set; }
-    
+    [ForeignKey("FilmId")]
+    public Films Film { get; set; }
+
+    [Required]
     public int CategoryId { get; set; }
-    public Categories Categories { get; set; }
+    [ForeignKey("CategoryId")]
+    public Categories Category { get; set; }
 
     
 }

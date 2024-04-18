@@ -1,0 +1,66 @@
+﻿@model System.Collections.Generic.List<FilmWithCategoriesViewModel>?
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<style>
+    #control
+    {
+        padding: 10px;
+        background: #f7f7f7;
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+        border-radius: 5px;
+    }
+
+    .filter
+    {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    table tr td
+    {
+        padding: 20px;
+    }
+</style>
+
+<div id="control">
+    <div class="filter" id="filterBtn">
+        <i class="fa-solid fa-gear" style="color: gray;"></i>
+        Фільтрувати за параметрами
+        <i class="fa-solid fa-chevron-down" style="color: lightblue;"></i>
+    </div>
+</div>
+<article>
+    <table>
+        <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Режисер</th>
+            <th>Дата виходу</th>
+            <th>Категорії</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>Режисер: @item.Director</td>
+                <td>@item.Release.ToString("dd-MM-yy")</td>
+                <td></td>
+            </tr>
+        }
+        
+        </tbody>
+    </table>
+</article>
+
+<script>
+    
+</script>
