@@ -6,6 +6,7 @@ namespace Domain.Entity;
 public class FilmCategories
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("FilmCategoryId")]
     public int Id { get; set; }
 
@@ -18,6 +19,4 @@ public class FilmCategories
     public int CategoryId { get; set; }
     [ForeignKey("CategoryId")]
     public Categories Category { get; set; }
-
-    
 }

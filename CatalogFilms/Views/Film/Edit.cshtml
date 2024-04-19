@@ -1,0 +1,159 @@
+﻿@model EditViewModel?
+
+@{
+    ViewBag.Title = "Редагування фільму";
+    Layout = "_Layout";
+}
+
+<style>
+    #editFilmForm {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #editFilmForm div {
+        margin-bottom: 15px;
+    }
+
+    #editFilmForm label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    #editFilmForm input[type="text"],
+    #editFilmForm select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    #editFilmForm input[type="datetime-local"] {
+        width: calc(100% - 16px); /* віднімаємо 16px, щоб вирівняти з іншими інпутами */
+    }
+
+    #editFilmForm button[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #editFilmForm button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<form asp-action="Edit" method="post" id="editFilmForm">
+    <input asp-for="Id" style="display: none;"/>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Director" class="control-label"></label>
+        <input asp-for="Director" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Release" class="control-label"></label>
+        <input asp-for="Release" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label for="currentCategories">Поточні категорії</label>
+        <ul id="currentCategories">
+            @foreach (var category in Model.CategoriesList)
+            {
+                <li data-category-id="@category">@category.Name</li>
+            }
+        </ul>
+    </div>
+    <div class="form-group">
+        <label for="availableCategories">Додати або видалити категорії</label>
+        <!-- Вивід всіх доступних категорій -->
+        <select id="availableCategories" multiple>
+            @foreach (var category in ViewBag.Categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <!-- Додаємо кнопки для додавання та видалення категорій -->
+        <button type="button" id="addCategoriesBtn">Додати категорії до фільму</button>
+        <button type="button" id="removeCategoriesBtn">Видалити категорії з фільму</button>
+    </div>
+    <div class="form-group">
+        <button onclick="editFilm()">Зберегти</button>
+    </div>
+</form>
+
+<script>
+    let selectedCategories = [];
+
+    async function removeCategories() {
+        const ul = document.getElementById("currentCategories");
+        const lisToRemove = Array.from(ul.querySelectorAll('li.selected'));
+
+        lisToRemove.forEach(li => {
+            ul.removeChild(li);
+            const categoryId = parseInt(li.getAttribute('data-category-id'));
+            // Видаляємо категорію зі списку вибраних категорій у моделі
+            const index = selectedCategories.indexOf(categoryId);
+            if (index > -1) {
+                selectedCategories.splice(index, 1);
+            }
+        });
+    }
+
+    async function editFilm() {
+        const id = document.getElementById('Id').value;
+        const name = document.querySelector('input[name="Name"]').value;
+        const director = document.querySelector('input[name="Director"]').value;
+        const release = document.querySelector('input[name="Release"]').value;
+
+        const model = {
+            Id: id,
+            Name: name,
+            Director: director,
+            Release: release,
+            SelectedCategoriesList: selectedCategories
+        };
+
+        const filmService = new FilmService('http://localhost:5099/api/Film');
+
+        const response = await filmService.updateFilm(model);
+        window.location.href = "/Film/Index";
+    }
+
+    async function addCategories() {
+        const select = document.getElementById("availableCategories");
+        const ul = document.getElementById("currentCategories");
+        const selectedOptions = Array.from(select.selectedOptions);
+
+        selectedOptions.forEach(option => {
+            const id = option.value;
+            const text = option.textContent;
+            if (!ul.innerHTML.includes(text)) {
+                const li = document.createElement("li");
+                li.textContent = text;
+                li.setAttribute('data-category-id', id);
+                ul.appendChild(li);
+                selectedCategories.push(parseInt(id));
+            }
+        });
+    }
+
+    // Додамо обробники подій для кнопок додавання та видалення категорій
+    document.getElementById("addCategoriesBtn").addEventListener("click", addCategories);
+    document.getElementById("removeCategoriesBtn").addEventListener("click", removeCategories);
+
+</script>

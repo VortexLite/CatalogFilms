@@ -1,7 +1,7 @@
 ﻿@model System.Collections.Generic.List<FilmWithCategoriesViewModel>?
 
 @{
-    ViewBag.Title = "title";
+    ViewBag.Title = "Каталог фільмів";
     Layout = "_Layout";
 }
 
@@ -116,6 +116,7 @@
                     <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
                     <td>
                         <a asp-controller="Film" asp-action="Edit"
+                           asp-route-id="@item.Id"
                            style="margin-right: 10px">
                             <i class="fa-solid fa-pen" ></i>
                         </a>

@@ -6,6 +6,7 @@ namespace Domain.Entity;
 public class Films
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("FilmId")]
     public int Id { get; set; }
 
@@ -20,5 +21,5 @@ public class Films
     [Required]
     public DateTime Release { get; set; }
 
-    public List<FilmCategories> FilmCategories { get; set; }
+    public List<FilmCategories>? FilmCategories { get; set; }
 }

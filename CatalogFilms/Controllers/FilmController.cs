@@ -1,23 +1,20 @@
-﻿using CatalogFilms.Models;
+﻿using System.Text;
+using CatalogFilms.Models;
 using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using WebAPI.DAL;
 
 namespace CatalogFilms.Controllers;
 
 public class FilmController : Controller
 {
-    Uri _baseAdress = new Uri("http://localhost:5099/api");
+    private readonly Uri _baseAdress = new Uri("http://localhost:5099/api");
     private readonly HttpClient _client;
-    private readonly ApplicationDbContext _db;
 
-    public FilmController(ApplicationDbContext db)
+    public FilmController()
     {
         _client = new HttpClient();
         _client.BaseAddress = _baseAdress;
-        _db = db;
     }
     
     [HttpGet]
@@ -34,14 +31,89 @@ public class FilmController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        var categories = new List<Categories>();
+        var response = await _client.GetAsync(_client.BaseAddress + "/Category/Get");
+        if (response.IsSuccessStatusCode)
+        {
+            string data = await response.Content.ReadAsStringAsync();
+            ViewBag.Categories = JsonConvert.DeserializeObject<List<Categories>>(data);
+        }
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Create(FilmWithCategoriesViewModel model)
+    {
+        try
+        {
+            string data = JsonConvert.SerializeObject(model);
+            var content = new StringContent(data, Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync(_client.BaseAddress + "/Film/Post", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["successMessage"] = "Film created.";
+                return RedirectToAction("Index");
+            }
+        }
+        catch (Exception e)
+        {
+            TempData["errorMessage"] = e.Message;
+            return View();
+        }
+
         return View();
     }
     
     [HttpGet]
-    public IActionResult Edit()
+    public async Task<IActionResult> Edit(int id)
     {
-        return View();
+        try
+        {
+            var film = new EditViewModel();
+            var response = await _client.GetAsync(_client.BaseAddress + $"/Film/GetEditFilm/{id}");
+            
+            var categories = new List<Categories>();
+            var responseCategory = await _client.GetAsync(_client.BaseAddress + "/Category/Get");
+            if (response.IsSuccessStatusCode)
+            {
+                string data = await response.Content.ReadAsStringAsync();
+                film = JsonConvert.DeserializeObject<EditViewModel>(data);
+
+                string data2 = await responseCategory.Content.ReadAsStringAsync();
+                ViewBag.Categories = JsonConvert.DeserializeObject<List<Categories>>(data2);
+            }
+            return View(film);
+        }
+        catch (Exception e)
+        {
+            TempData["errorMessage"] = e.Message;
+            return View();
+        }
     }
+
+    /*[HttpPost]
+    public async Task<IActionResult> Edit(EditViewModel model)
+    {
+        try
+        {
+            string data = JsonConvert.SerializeObject(model);
+            var content = new StringContent(data, Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync(_client.BaseAddress + "/Film/Put", content);
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["successMessage"] = "Film details updated";
+                return RedirectToAction("Index");
+            }
+
+            return View();
+        }
+        catch (Exception e)
+        {
+            TempData["errorMessage"] = e.Message;
+            return View();
+        }
+    }*/
 }

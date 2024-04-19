@@ -1,8 +1,118 @@
-﻿@model dynamic
+﻿@model FilmWithCategoriesViewModel
 
 @{
-    ViewBag.Title = "title";
+    ViewBag.Title = "Додавання фільму";
     Layout = "_Layout";
 }
 
-<h2>title</h2>
+<style>
+    #createFilmForm {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #createFilmForm div {
+        margin-bottom: 15px;
+    }
+
+    #createFilmForm label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    #createFilmForm input[type="text"],
+    #createFilmForm select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    #createFilmForm input[type="datetime-local"] {
+        width: calc(100% - 16px); /* віднімаємо 16px, щоб вирівняти з іншими інпутами */
+    }
+
+    #createFilmForm button[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #createFilmForm button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+
+
+<form id="createFilmForm">
+    <div>
+        <label asp-for="Name">Назва:</label>
+        <input asp-for="Name" class="form-control" required />
+        @*<span asp-validation-for="Name" class="text-danger"></span>*@
+    </div>
+    <div>
+        <label asp-for="Director">Режисер:</label>
+        <input asp-for="Director" class="form-control" required />
+        @*<span asp-validation-for="Director" class="text-danger"></span>*@
+    </div>
+    <div>
+        <label asp-for="Release">Дата виходу:</label>
+        <input asp-for="Release" class="form-control" required />
+        @*<span asp-validation-for="Release" class="text-danger"></span>*@
+    </div>
+    <div>
+        <label asp-for="SelectedCategoriesList">Категорії:</label>
+        <select id="SelectedCategoriesList" name="SelectedCategoriesList[]" multiple>
+            @if (ViewBag.Categories != null)
+            {
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <button type="submit" onclick="createFilm()">Створити</button>
+</form>
+
+
+<script>
+    async function createFilm() {
+        const name = document.getElementById('Name').value;
+        const director = document.getElementById('Director').value;
+        const release = document.getElementById('Release').value;
+        const selectedCategories = Array.from(document.getElementById('SelectedCategoriesList').selectedOptions)
+            .map(option => parseInt(option.value));
+
+        console.log(name);
+        console.log(director);
+        console.log(release);
+        console.log(selectedCategories);
+
+        const model = {
+            Name: name,
+            Director: director,
+            Release: release,
+            SelectedCategoriesList: selectedCategories
+        };
+
+        const filmService = new FilmService('http://localhost:5099/api/Film');
+
+        try {
+            const response = await filmService.addFilm(model);
+            window.location.href = '/Film/Index';
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+</script>

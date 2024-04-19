@@ -6,6 +6,7 @@ namespace Domain.Entity;
 public class Categories
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("CategoryId")]
     public int Id { get; set; }
 
@@ -15,5 +16,5 @@ public class Categories
 
     public int? ParentCategoryId { get; set; }
 
-    public List<FilmCategories> FilmCategories { get; set; }
+    public List<FilmCategories>? FilmCategories { get; set; }
 }
