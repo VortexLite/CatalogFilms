@@ -105,27 +105,26 @@
         </tr>
         </thead>
         <tbody id="filmsList">
-        @if (Model != null)
-        {
-            foreach (var item in Model)
+            @if (Model != null)
             {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>Режисер: @item.Director</td>
-                    <td>@item.Release.ToString("dd.MM.yy hh:mm")</td>
-                    <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
-                    <td>
-                        <a asp-controller="Film" asp-action="Edit"
-                           asp-route-id="@item.Id"
-                           style="margin-right: 10px">
-                            <i class="fa-solid fa-pen" ></i>
-                        </a>
-                        <i class="fa-solid fa-x delete-film" data-film-id="@item.Id"></i>
-                        
-                    </td>
-                </tr>
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>Режисер: @item.Director</td>
+                        <td>@item.Release.ToString("dd.MM.yy hh:mm")</td>
+                        <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
+                        <td>
+                            <a asp-controller="Film" asp-action="Edit"
+                               asp-route-id="@item.Id"
+                               style="margin-right: 10px">
+                                <i class="fa-solid fa-pen" ></i>
+                            </a>
+                            <i class="fa-solid fa-x delete-film" data-film-id="@item.Id"></i>
+                        </td>
+                    </tr>
+                }
             }
-        }
         </tbody>
     </table>
 </article>
@@ -135,8 +134,6 @@
         <span class="close"><i class="fa-solid fa-x"></i></span>
     </div>
 </div>
-
-
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -172,13 +169,12 @@
                 <td>${new Date(film.release).toLocaleDateString()}</td>
                 <td>${categories}</td>
                 <td>
-                        <a asp-controller="Film" asp-action="Edit"
-                           style="margin-right: 10px">
-                            <i class="fa-solid fa-pen" ></i>
-                        </a>
-                        <i class="fa-solid fa-x delete-film" data-film-id="${film.id}"></i>
-                        
-                    </td>
+                    <a asp-controller="Film" asp-action="Edit" 
+                        style="margin-right: 10px">
+                        <i class="fa-solid fa-pen" ></i>
+                    </a>
+                    <i class="fa-solid fa-x delete-film" data-film-id="${film.id}"></i>    
+                </td>
             </tr>
         `;
             filmsList.innerHTML += row;

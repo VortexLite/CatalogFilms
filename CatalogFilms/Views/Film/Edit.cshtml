@@ -6,7 +6,8 @@
 }
 
 <style>
-    #editFilmForm {
+    #editFilmForm 
+    {
         max-width: 400px;
         margin: 0 auto;
         padding: 20px;
@@ -15,18 +16,21 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    #editFilmForm div {
+    #editFilmForm div 
+    {
         margin-bottom: 15px;
     }
 
-    #editFilmForm label {
+    #editFilmForm label 
+    {
         font-weight: bold;
         display: block;
         margin-bottom: 5px;
     }
 
     #editFilmForm input[type="text"],
-    #editFilmForm select {
+    #editFilmForm select 
+    {
         width: 100%;
         padding: 8px;
         border: 1px solid #ccc;
@@ -34,11 +38,13 @@
         box-sizing: border-box;
     }
 
-    #editFilmForm input[type="datetime-local"] {
-        width: calc(100% - 16px); /* віднімаємо 16px, щоб вирівняти з іншими інпутами */
+    #editFilmForm input[type="datetime-local"] 
+    {
+        width: calc(100% - 16px); 
     }
 
-    #editFilmForm button[type="submit"] {
+    #editFilmForm button[type="submit"] 
+    {
         background-color: #4CAF50;
         color: white;
         padding: 10px 20px;
@@ -48,7 +54,8 @@
         font-size: 16px;
     }
 
-    #editFilmForm button[type="submit"]:hover {
+    #editFilmForm button[type="submit"]:hover 
+    {
         background-color: #45a049;
     }
 </style>
@@ -78,7 +85,6 @@
     </div>
     <div class="form-group">
         <label for="availableCategories">Додати або видалити категорії</label>
-        <!-- Вивід всіх доступних категорій -->
         <select id="availableCategories" multiple>
             @foreach (var category in ViewBag.Categories)
             {
@@ -87,7 +93,6 @@
         </select>
     </div>
     <div class="form-group">
-        <!-- Додаємо кнопки для додавання та видалення категорій -->
         <button type="button" id="addCategoriesBtn">Додати категорії до фільму</button>
         <button type="button" id="removeCategoriesBtn">Видалити категорії з фільму</button>
     </div>
@@ -106,7 +111,6 @@
         lisToRemove.forEach(li => {
             ul.removeChild(li);
             const categoryId = parseInt(li.getAttribute('data-category-id'));
-            // Видаляємо категорію зі списку вибраних категорій у моделі
             const index = selectedCategories.indexOf(categoryId);
             if (index > -1) {
                 selectedCategories.splice(index, 1);
@@ -151,8 +155,7 @@
             }
         });
     }
-
-    // Додамо обробники подій для кнопок додавання та видалення категорій
+    
     document.getElementById("addCategoriesBtn").addEventListener("click", addCategories);
     document.getElementById("removeCategoriesBtn").addEventListener("click", removeCategories);
 

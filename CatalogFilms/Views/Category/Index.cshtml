@@ -1,0 +1,120 @@
+﻿@model List<CategoryViewModel>
+
+@{
+    ViewBag.Title = "Список категорії";
+    Layout = "_Layout";
+}
+
+<style>
+    #control
+    {
+        padding: 10px;
+        background: #f7f7f7;
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+        border-radius: 5px;
+    }
+
+    #control a
+    {
+        text-decoration: none;
+        color: #5200ee;
+    }
+    
+    table 
+    {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th 
+    {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    td 
+    {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    
+    tr:nth-child(odd) 
+    {
+        background-color: #f9f9f9;
+    }
+    
+    a, button 
+    {
+        text-decoration: none;
+        color: #007bff;
+        border: none;
+        background: none;
+        cursor: pointer;
+    }
+    
+    a:hover, button:hover 
+    {
+        text-decoration: underline;
+    }
+</style>
+
+<div id="control">
+    <a asp-action="Create">Додати категорію</a>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Назва</th>
+        <th>Кількість фільмів</th>
+        <th>Рівень вкладеності</th>
+        <th>Керування</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var category in Model)
+    {
+        <tr>
+            <td>@category.Id</td>
+            <td>@category.Name</td>
+            <td>@category.FilmCount</td>
+            <td>@category.NestingLevel</td>
+            <td>
+                <a asp-controller="Category" asp-action="Edit"
+                   asp-route-id="@category.Id"
+                   style="margin-right: 10px">
+                    <i class="fa-solid fa-pen" ></i>
+                </a>
+                <button onclick="deleteCategory()"><i class="fa-solid fa-x delete-category" data-category-id="@category.Id"></i></button>
+
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<script>
+    const categoryService = new CategoryService('http://localhost:5099/api/Category');
+    
+    const deleteButtons = document.querySelectorAll('.delete-category');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const categoryId = button.dataset.categoryId;
+            console.log(categoryId);
+            try {
+                await categoryService.deleteCategory(categoryId);
+                button.closest('tr').remove();
+                alert('Категорія успішно видалена!');
+            } catch (error) {
+                console.error('Помилка видалення категорії:', error);
+                alert('Виникла помилка під час видалення категорії');
+            }
+        });
+    });
+</script>

@@ -52,3 +52,48 @@
         return await response.json();
     }
 }
+
+class CategoryService {
+    constructor(baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    async getCategory() {
+        const response = await fetch(`${this.baseUrl}/Get`);
+        return await response.json();
+    }
+
+    async getCategoryId(id) {
+        const response = await fetch(`${this.baseUrl}/Get/${id}`);
+        return await response.json();
+    }
+
+    async addCategory(model) {
+        const response = await fetch(`${this.baseUrl}/Post`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(model)
+        });
+        return await response.text();
+    }
+
+    async updateCategory(model) {
+        const response = await fetch(`${this.baseUrl}/Put`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(model)
+        });
+        return await response.text();
+    }
+
+    async deleteCategory(id) {
+        const response = await fetch(`${this.baseUrl}/Delete?id=${id}`, {
+            method: 'DELETE'
+        });
+        return await response.text();
+    }
+}

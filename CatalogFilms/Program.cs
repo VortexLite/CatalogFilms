@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DAL;
+using WebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -6,7 +6,8 @@
 }
 
 <style>
-    #createFilmForm {
+    #createFilmForm 
+    {
         max-width: 400px;
         margin: 0 auto;
         padding: 20px;
@@ -15,18 +16,21 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    #createFilmForm div {
+    #createFilmForm div 
+    {
         margin-bottom: 15px;
     }
 
-    #createFilmForm label {
+    #createFilmForm label
+    {
         font-weight: bold;
         display: block;
         margin-bottom: 5px;
     }
 
     #createFilmForm input[type="text"],
-    #createFilmForm select {
+    #createFilmForm select 
+    {
         width: 100%;
         padding: 8px;
         border: 1px solid #ccc;
@@ -34,11 +38,13 @@
         box-sizing: border-box;
     }
 
-    #createFilmForm input[type="datetime-local"] {
-        width: calc(100% - 16px); /* віднімаємо 16px, щоб вирівняти з іншими інпутами */
+    #createFilmForm input[type="datetime-local"] 
+    {
+        width: calc(100% - 16px);
     }
 
-    #createFilmForm button[type="submit"] {
+    #createFilmForm button[type="submit"] 
+    {
         background-color: #4CAF50;
         color: white;
         padding: 10px 20px;
@@ -48,7 +54,8 @@
         font-size: 16px;
     }
 
-    #createFilmForm button[type="submit"]:hover {
+    #createFilmForm button[type="submit"]:hover 
+    {
         background-color: #45a049;
     }
 </style>
@@ -58,17 +65,14 @@
     <div>
         <label asp-for="Name">Назва:</label>
         <input asp-for="Name" class="form-control" required />
-        @*<span asp-validation-for="Name" class="text-danger"></span>*@
     </div>
     <div>
         <label asp-for="Director">Режисер:</label>
         <input asp-for="Director" class="form-control" required />
-        @*<span asp-validation-for="Director" class="text-danger"></span>*@
     </div>
     <div>
         <label asp-for="Release">Дата виходу:</label>
         <input asp-for="Release" class="form-control" required />
-        @*<span asp-validation-for="Release" class="text-danger"></span>*@
     </div>
     <div>
         <label asp-for="SelectedCategoriesList">Категорії:</label>
@@ -93,11 +97,6 @@
         const release = document.getElementById('Release').value;
         const selectedCategories = Array.from(document.getElementById('SelectedCategoriesList').selectedOptions)
             .map(option => parseInt(option.value));
-
-        console.log(name);
-        console.log(director);
-        console.log(release);
-        console.log(selectedCategories);
 
         const model = {
             Name: name,

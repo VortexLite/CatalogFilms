@@ -3,7 +3,6 @@ using Domain.Entity;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DAL;
 
 namespace WebAPI.Controllers;
 

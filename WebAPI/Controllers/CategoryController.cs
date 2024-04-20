@@ -1,7 +1,7 @@
-﻿using Domain.Entity;
+﻿using CatalogFilms.Models;
+using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DAL;
 
 namespace WebAPI.Controllers;
 
@@ -24,7 +24,7 @@ public class CategoryController : ControllerBase
             var categories = await _db.Categories.ToListAsync();
             if (categories.Count == 0)
             {
-                return NotFound("Films not available.");
+                return NotFound("Category not available.");
             }
 
             return Ok(categories);
@@ -43,7 +43,7 @@ public class CategoryController : ControllerBase
             var categories = await _db.Categories.FirstOrDefaultAsync(i => i.Id == id);
             if (categories == null)
             {
-                return NotFound("Film not found.");
+                return NotFound("Category not found.");
             }
 
             return Ok(categories);
@@ -57,23 +57,33 @@ public class CategoryController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(Categories model)
     {
-        await _db.AddAsync(model);
-        await _db.SaveChangesAsync();
-        return Ok("Categories created.");
+        try
+        {
+            var parentCategory = await _db.Categories.FindAsync(model.ParentCategoryId);
+            if (await IsCircularReference(model.Id, parentCategory))
+            {
+                return BadRequest("This will lead to a cyclic dependency of the categories.");
+            }
+
+            await _db.AddAsync(model);
+            await _db.SaveChangesAsync();
+            return Ok("Category created.");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
     
     [HttpPut]
     public async Task<IActionResult> Put(Categories model)
     {
-        if (model == null || model.Id == 0)
+        if (model.ParentCategoryId.HasValue)
         {
-            if (model == null)
+            var parentCategory = await _db.Categories.FindAsync(model.ParentCategoryId);
+            if (await IsCircularReference(model.Id, parentCategory))
             {
-                return BadRequest("Model data is invalid");
-            }
-            else if (model.Id == 0)
-            {
-                return BadRequest($"Categories Id {model.Id} is invalid");
+                return BadRequest("This will lead to a cyclical dependence of categories.");
             }
         }
 
@@ -117,22 +127,106 @@ public class CategoryController : ControllerBase
             return BadRequest(e.Message);
         }
     }
-    
-    private bool CheckForCycle(int categoryId, int? parentCategoryId)
+    private async Task<bool> IsCircularReference(int categoryId, Categories parentCategory)
     {
-        if (!parentCategoryId.HasValue)
-            return false;
-
-        var parentCategory = _db.Categories.Find(parentCategoryId);
-
-        while (parentCategory != null)
+        if (parentCategory == null)
         {
-            if (parentCategory.Id == categoryId)
-                return true;
-
-            parentCategory = _db.Categories.Find(parentCategory.ParentCategoryId);
+            return false;
         }
 
-        return false;
+        if (parentCategory.Id == categoryId)
+        {
+            return true;
+        }
+
+        return await IsCircularReference(categoryId, parentCategory.ParentCategoryId.HasValue ? 
+            await _db.Categories.FindAsync(parentCategory.ParentCategoryId.Value) : 
+            null);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetViewModel()
+    {
+        try
+        {
+            var categoryViewModels = new List<CategoryViewModel>();
+            var categories = await _db.Categories.ToListAsync();
+            if (categories.Count == 0)
+            {
+                return NotFound("Categories not available.");
+            }
+            
+            foreach (var category in categories)
+            {
+                var categoryViewModel = new CategoryViewModel
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    FilmCount = await GetFilmCountAsync(category.Id),
+                    NestingLevel = await GetNestingLevelAsync(category.Id) - 1
+                };
+
+                categoryViewModels.Add(categoryViewModel);
+            }
+            
+            return Ok(categoryViewModels);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetEditViewModel(int id)
+    {
+        try
+        {
+            var categories = await _db.Categories.FirstOrDefaultAsync(i => i.Id == id);
+            if (categories == null)
+            {
+                return NotFound("Category not found.");
+            }
+            
+            var parentCategories = await _db.Categories.FirstOrDefaultAsync(i => i.Id == categories.ParentCategoryId);
+            if (parentCategories == null)
+            {
+                return NotFound("Category not found.");
+            }
+            
+            var editCategoryViewModel = new EditCategoryViewModel
+            {
+                Id = categories.Id,
+                Name = categories.Name,
+                ParentCategoryId = categories.ParentCategoryId,
+                NameParent = parentCategories.Name
+            };
+
+            return Ok(editCategoryViewModel);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+    
+    private async Task<int> GetFilmCountAsync(int categoryId)
+    {
+        return await _db.FilmCategories.CountAsync(fc => fc.CategoryId == categoryId);
+    }
+    
+    private async Task<int> GetNestingLevelAsync(int categoryId)
+    {
+        var nestingLevel = 0;
+        int? currentCategoryId = categoryId;
+
+        while (currentCategoryId != null)
+        {
+            var parentCategory = await _db.Categories.FirstOrDefaultAsync(c => c.Id == currentCategoryId);
+            currentCategoryId = parentCategory?.ParentCategoryId;
+            nestingLevel++;
+        }
+
+        return nestingLevel;
     }
 }

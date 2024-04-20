@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CatalogFilms.Models;
 using Newtonsoft.Json;
-using WebAPI.DAL;
 
 namespace CatalogFilms.Controllers;
 
@@ -10,15 +9,11 @@ public class HomeController : Controller
 {
     Uri _baseAdress = new Uri("http://localhost:5099/api");
     private readonly HttpClient _client;
-    private readonly ApplicationDbContext _db;
-    private readonly ILogger<HomeController> _logger;
     
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext db)
+    public HomeController()
     {
-        _logger = logger;
         _client = new HttpClient();
         _client.BaseAddress = _baseAdress;
-        _db = db;
     }
 
     public async Task<IActionResult> Index()

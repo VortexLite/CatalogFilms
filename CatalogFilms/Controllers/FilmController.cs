@@ -1,5 +1,4 @@
-﻿using System.Text;
-using CatalogFilms.Models;
+﻿using CatalogFilms.Models;
 using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -33,7 +32,6 @@ public class FilmController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var categories = new List<Categories>();
         var response = await _client.GetAsync(_client.BaseAddress + "/Category/Get");
         if (response.IsSuccessStatusCode)
         {
@@ -43,7 +41,7 @@ public class FilmController : Controller
         return View();
     }
     
-    [HttpPost]
+    /*[HttpPost]
     public async Task<IActionResult> Create(FilmWithCategoriesViewModel model)
     {
         try
@@ -65,7 +63,7 @@ public class FilmController : Controller
         }
 
         return View();
-    }
+    }*/
     
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
@@ -75,7 +73,6 @@ public class FilmController : Controller
             var film = new EditViewModel();
             var response = await _client.GetAsync(_client.BaseAddress + $"/Film/GetEditFilm/{id}");
             
-            var categories = new List<Categories>();
             var responseCategory = await _client.GetAsync(_client.BaseAddress + "/Category/Get");
             if (response.IsSuccessStatusCode)
             {

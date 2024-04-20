@@ -1,7 +1,7 @@
 ﻿using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace WebAPI.DAL;
+namespace WebAPI;
 
 public class ApplicationDbContext : DbContext
 {
@@ -15,9 +15,4 @@ public class ApplicationDbContext : DbContext
     public DbSet<Films> Films { get; set; }
     public DbSet<Categories> Categories { get; set; }
     public DbSet<FilmCategories> FilmCategories { get; set; }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-    }
 }

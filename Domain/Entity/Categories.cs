@@ -17,4 +17,5 @@ public class Categories
     public int? ParentCategoryId { get; set; }
 
     public List<FilmCategories>? FilmCategories { get; set; }
+    
 }
