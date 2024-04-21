@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddControllers();
+builder.Services.AddTransient<DbInitializer>();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -32,6 +33,22 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+await SeedData(app);
+
+async Task SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<DbInitializer>();
+        
+        await service.SeedCategories();
+        await service.SeedFilms();
+        await service.SeedFilmsCategories();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -135,7 +135,7 @@
                 <tr>
                     <td>@item.Name</td>
                     <td>Режисер: @item.Director</td>
-                    <td>@item.Release.ToString("dd.MM.yy hh:mm")</td>
+                    <td>@item.Release.ToString("dd.MM.yyyy hh:mm")</td>
                     <td>@string.Join(", ", item.CategoriesList.Select(c => c.Name))</td>
                 </tr>
             }
